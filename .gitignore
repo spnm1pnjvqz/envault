@@ -1,0 +1,13 @@
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+*.prof
+*.test
+.env
+*.swo
+*.swp
+coverage.txt
+Desktop.ini
