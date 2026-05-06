@@ -3,6 +3,7 @@ package env
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -43,11 +44,15 @@ func ToMap(entries []Entry) map[string]string {
 }
 
 // FromMap converts a map into a sorted slice of entries.
+// Keys are sorted alphabetically to produce deterministic output.
 func FromMap(m map[string]string) []Entry {
 	entries := make([]Entry, 0, len(m))
 	for k, v := range m {
 		entries = append(entries, Entry{Key: k, Value: v})
 	}
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Key < entries[j].Key
+	})
 	return entries
 }
 
