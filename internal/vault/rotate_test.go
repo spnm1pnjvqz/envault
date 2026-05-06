@@ -86,6 +86,60 @@ func TestRotateKeys(t *testing.T) {
 	}
 }
 
+func TestRotateKeysUpdatesConfigPublicKey(t *testing.T) {
+	dir := t.TempDir()
+
+	recipient, identity, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatalf("generate key pair: %v", err)
+	}
+
+	keyPath := filepath.Join(dir, "identity.txt")
+	cfgPath := filepath.Join(dir, ".envault.toml")
+	vaultPath := filepath.Join(dir, ".env.age")
+	envPath := filepath.Join(dir, ".env")
+
+	if err := SaveKeyPair(recipient, identity, keyPath); err != nil {
+		t.Fatalf("save key pair: %v", err)
+	}
+
+	cfg := DefaultConfig()
+	cfg.PublicKey = recipient.String()
+	cfg.PrivateKeyPath = keyPath
+	cfg.VaultFile = vaultPath
+	cfg.EnvFile = envPath
+
+	if err := SaveConfig(cfg, cfgPath); err != nil {
+		t.Fatalf("save config: %v", err)
+	}
+
+	v, err := New(cfgPath)
+	if err != nil {
+		t.Fatalf("new vault: %v", err)
+	}
+	if err := v.Lock([]env.Entry{{Key: "FOO", Value: "bar"}}); err != nil {
+		t.Fatalf("lock: %v", err)
+	}
+
+	originalPublicKey := cfg.PublicKey
+
+	if err := v.RotateKeys(); err != nil {
+		t.Fatalf("rotate keys: %v", err)
+	}
+
+	// Re-load config from disk and verify the public key was updated
+	newCfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("load config after rotate: %v", err)
+	}
+	if newCfg.PublicKey == originalPublicKey {
+		t.Error("expected public key to change after rotation, but it remained the same")
+	}
+	if newCfg.PublicKey == "" {
+		t.Error("expected non-empty public key after rotation")
+	}
+}
+
 func TestArchiveFileNotExist(t *testing.T) {
 	dir := t.TempDir()
 	src := filepath.Join(dir, "nonexistent.txt")
