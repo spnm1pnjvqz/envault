@@ -76,3 +76,20 @@ func TestLoadPrivateKeyNoValidKey(t *testing.T) {
 		t.Error("expected error when no secret key found, got nil")
 	}
 }
+
+func TestGenerateKeyPairUniqueness(t *testing.T) {
+	kp1, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatalf("GenerateKeyPair() error: %v", err)
+	}
+	kp2, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatalf("GenerateKeyPair() error: %v", err)
+	}
+	if kp1.PublicKey == kp2.PublicKey {
+		t.Error("expected distinct public keys from separate GenerateKeyPair calls")
+	}
+	if kp1.PrivateKey == kp2.PrivateKey {
+		t.Error("expected distinct private keys from separate GenerateKeyPair calls")
+	}
+}
