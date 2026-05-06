@@ -61,6 +61,14 @@ func LoadPrivateKey(path string) (string, error) {
 	return "", errors.New("no age secret key found in file")
 }
 
+// KeyFileExists reports whether a key file exists at the given path.
+// It expands a leading ~ to the user's home directory before checking.
+func KeyFileExists(path string) bool {
+	expanded := expandHome(path)
+	_, err := os.Stat(expanded)
+	return err == nil
+}
+
 // expandHome replaces a leading ~ with the user's home directory.
 func expandHome(path string) string {
 	if !strings.HasPrefix(path, "~") {
