@@ -17,4 +17,11 @@
 // Key material is never written to disk by this package; callers are
 // responsible for sourcing keys from a secure location (e.g. environment
 // variables or a key file with restricted permissions).
+//
+// # Error Handling
+//
+// All functions return descriptive errors that wrap the underlying cause.
+// Use errors.Is and errors.As to inspect specific failure modes. Common
+// errors include ErrKeyMismatch (wrong private key for the vault) and
+// ErrCorrupted (vault file failed integrity checks).
 package vault
