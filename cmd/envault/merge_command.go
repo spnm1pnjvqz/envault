@@ -24,16 +24,9 @@ Conflict strategies:
 			dstPath := args[0]
 			srcPath := args[1]
 
-			var s vault.MergeStrategy
-			switch strategy {
-			case "ours":
-				s = vault.MergeStrategyOurs
-			case "theirs":
-				s = vault.MergeStrategyTheirs
-			case "error":
-				s = vault.MergeStrategyError
-			default:
-				return fmt.Errorf("unknown strategy %q: choose ours, theirs, or error", strategy)
+			s, err := parseMergeStrategy(strategy)
+			if err != nil {
+				return err
 			}
 
 			res, err := vault.MergeEnvFiles(dstPath, srcPath, s)
@@ -61,4 +54,19 @@ Conflict strategies:
 		"Conflict resolution strategy: ours | theirs | error")
 
 	rootCmd.AddCommand(mergeCmd)
+}
+
+// parseMergeStrategy converts a strategy string into a vault.MergeStrategy
+// constant, returning an error for unrecognised values.
+func parseMergeStrategy(s string) (vault.MergeStrategy, error) {
+	switch s {
+	case "ours":
+		return vault.MergeStrategyOurs, nil
+	case "theirs":
+		return vault.MergeStrategyTheirs, nil
+	case "error":
+		return vault.MergeStrategyError, nil
+	default:
+		return 0, fmt.Errorf("unknown strategy %q: choose ours, theirs, or error", s)
+	}
 }
